@@ -1,0 +1,397 @@
+{
+  "hardware": {
+    "procesor": "Intel(R) Core(TM) i5-1035G4 CPU @ 1.10GHz",
+    "nuclee": 4,
+    "fire_executie": 8,
+    "frecventa": "1498 MHz",
+    "memorie_ram": "16 GB",
+    "tip_stocare": "SSD",
+    "capacitate_hdd": "476 GB",
+    "placa_de_baza": "LENOVO",
+    "placa_video": "Intel(R) Iris(R) Plus Graphics"
+  },
+  "securitate": "Windows Defender",
+  "sistem_de_operare": {
+    "nume": "Microsoft Windows [Version 10.0.19045.4529]",
+    "versiune": "",
+    "arhitectura": "amd64",
+    "data_instalarii": "2021-03-23 21:55:19",
+    "licenta": "N/A"
+  },
+  "software": {
+    "programe_instalate": [
+      {
+        "nume": "Notepad++",
+        "versiune": "8.5.0",
+        "producator": "TechyGeeksHome",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Teams Meeting Add-in for Microsoft Office",
+        "versiune": "1.24.14501",
+        "producator": "Microsoft",
+        "data_instalare": "20240627",
+        "licenta": ""
+      },
+      {
+        "nume": "Office 16 Click-to-Run Extensibility Component",
+        "versiune": "16.0.17628.20110",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "Office 16 Click-to-Run Extensibility Component 64-bit Registration",
+        "versiune": "16.0.17628.20164",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "Office 16 Click-to-Run Licensing Component",
+        "versiune": "16.0.17628.20164",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "PDFsam Basic",
+        "versiune": "4.2.8.0",
+        "producator": "Sober Lemur S.a.s. di Vacondio Andrea",
+        "data_instalare": "",
+        "licenta": ""
+      },
+      {
+        "nume": "ownCloud",
+        "versiune": "1.8.0.4847",
+        "producator": "ownCloud Community",
+        "data_instalare": "20201019",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2010  x64 Redistributable - 10.0.40219",
+        "versiune": "10.0.40219",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20230411",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Intune Management Extension",
+        "versiune": "1.80.132.0",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240702",
+        "licenta": ""
+      },
+      {
+        "nume": "Windows Subsystem for Linux",
+        "versiune": "2.2.4.0",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240627",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2013 x86 Minimum Runtime - 12.0.21005",
+        "versiune": "12.0.21005",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2013 x86 Additional Runtime - 12.0.21005",
+        "versiune": "12.0.21005",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "",
+        "licenta": ""
+      },
+      {
+        "nume": "HPSmartDeviceAgentBase",
+        "versiune": "1.1.0.0",
+        "producator": "HP Inc",
+        "data_instalare": "20211213",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Update Health Tools",
+        "versiune": "3.74.0.0",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20231110",
+        "licenta": ""
+      },
+      {
+        "nume": "Teams Machine-Wide Installer",
+        "versiune": "1.3.0.21759",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20201013",
+        "licenta": ""
+      },
+      {
+        "nume": "Google Chrome",
+        "versiune": "126.0.6478.127",
+        "producator": "Google, Inc.",
+        "data_instalare": "20201019",
+        "licenta": ""
+      },
+      {
+        "nume": "IDProtect Clientx64 6.29.00",
+        "versiune": "6.29.00",
+        "producator": "Athena Smartcard Solutions",
+        "data_instalare": "20221207",
+        "licenta": ""
+      },
+      {
+        "nume": "shellSAFE Verify x64",
+        "versiune": "2.7.3.0",
+        "producator": "UTI Systems",
+        "data_instalare": "20240403",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2015 x86 Minimum Runtime - 14.0.23026",
+        "versiune": "14.0.23026",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20201013",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2022 X64 Additional Runtime - 14.32.31326",
+        "versiune": "14.32.31326",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20230110",
+        "licenta": ""
+      },
+      {
+        "nume": "VLC media player 3.0.16 (64-bit)",
+        "versiune": "3.0.16.0",
+        "producator": "VideoLAN",
+        "data_instalare": "20211209",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2008 Redistributable - x64 9.0.30729.6161",
+        "versiune": "9.0.30729.6161",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20221207",
+        "licenta": ""
+      },
+      {
+        "nume": "Adobe Acrobat XI Pro",
+        "versiune": "11.0.06",
+        "producator": "Adobe Systems",
+        "data_instalare": "20201013",
+        "licenta": ""
+      },
+      {
+        "nume": "Adobe Refresh Manager",
+        "versiune": "1.8.0",
+        "producator": "Adobe Systems Incorporated",
+        "data_instalare": "20240215",
+        "licenta": ""
+      },
+      {
+        "nume": "Adobe Acrobat Reader DC",
+        "versiune": "21.007.20099",
+        "producator": "Adobe Systems Incorporated",
+        "data_instalare": "20211209",
+        "licenta": ""
+      },
+      {
+        "nume": "certSIGN Certificates Installer",
+        "versiune": "1.0.2.1",
+        "producator": "certSIGN",
+        "data_instalare": "20221207",
+        "licenta": ""
+      },
+      {
+        "nume": "SafeNet Authentication Client 10.2",
+        "versiune": "10.2.19.0",
+        "producator": "Gemalto",
+        "data_instalare": "20210315",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.6161",
+        "versiune": "9.0.30729.6161",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20211110",
+        "licenta": ""
+      },
+      {
+        "nume": "Windows Subsystem for Linux Update",
+        "versiune": "5.10.102.1",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240628",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030",
+        "versiune": "11.0.61030",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20210315",
+        "licenta": ""
+      },
+      {
+        "nume": "DefaultPackMSI",
+        "versiune": "4.6.2.0",
+        "producator": "Microsoft",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "HP Color MFP E77822-25-30 Basic Device Software",
+        "versiune": "49.10.4644.21303",
+        "producator": "HP Inc.",
+        "data_instalare": "20211213",
+        "licenta": ""
+      },
+      {
+        "nume": "Go Programming Language amd64 go1.22.4",
+        "versiune": "1.22.4",
+        "producator": "https://go.dev",
+        "data_instalare": "20240627",
+        "licenta": ""
+      },
+      {
+        "nume": "Check Point VPN",
+        "versiune": "98.61.2210",
+        "producator": "Check Point Software Technologies Ltd.",
+        "data_instalare": "",
+        "licenta": ""
+      },
+      {
+        "nume": "7-Zip 21.06 (x64 edition)",
+        "versiune": "21.06.00.0",
+        "producator": "Igor Pavlov",
+        "data_instalare": "",
+        "licenta": ""
+      },
+      {
+        "nume": "7-Zip 23.01 (x64 edition)",
+        "versiune": "23.01.00.0",
+        "producator": "Igor Pavlov",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "Xerox Desktop Print Experience 8.0",
+        "versiune": "8.110.9.0",
+        "producator": "Xerox Corporation",
+        "data_instalare": "20240221",
+        "licenta": ""
+      },
+      {
+        "nume": "Everything 1.4.1.1024 (x64)",
+        "versiune": "1.4.1.1024",
+        "producator": "voidtools",
+        "data_instalare": "20240612",
+        "licenta": ""
+      },
+      {
+        "nume": "PDFsam Basic",
+        "versiune": "5.1.3.0",
+        "producator": "Sober Lemur S.r.l.",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Edge",
+        "versiune": "126.0.2592.81",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20201124",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2022 X64 Minimum Runtime - 14.32.31326",
+        "versiune": "14.32.31326",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20230110",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2012 x86 Additional Runtime - 11.0.61030",
+        "versiune": "11.0.61030",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20221207",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2015 x86 Additional Runtime - 14.0.23026",
+        "versiune": "14.0.23026",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20201013",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030",
+        "versiune": "11.0.61030",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20210315",
+        "licenta": ""
+      },
+      {
+        "nume": "64 Bit HP CIO Components Installer",
+        "versiune": "21.2.1",
+        "producator": "HP Inc.",
+        "data_instalare": "20201019",
+        "licenta": ""
+      },
+      {
+        "nume": "MySQL Connector/ODBC 8.0",
+        "versiune": "8.0.20",
+        "producator": "Oracle Corporation",
+        "data_instalare": "20201013",
+        "licenta": ""
+      },
+      {
+        "nume": "MyQ Desktop Client",
+        "versiune": "8.2.22.2",
+        "producator": "MyQ, spol. s.r.o.",
+        "data_instalare": "20240111",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Visual C++ 2012 x86 Minimum Runtime - 11.0.61030",
+        "versiune": "11.0.61030",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20221207",
+        "licenta": ""
+      },
+      {
+        "nume": "Your Application",
+        "versiune": "1.0.0",
+        "producator": "Your Company",
+        "data_instalare": "20240702",
+        "licenta": ""
+      },
+      {
+        "nume": "clickSIGN x64",
+        "versiune": "2.7.3.2",
+        "producator": "certSIGN SA",
+        "data_instalare": "20221207",
+        "licenta": ""
+      },
+      {
+        "nume": "Microsoft Search in Bing",
+        "versiune": "2.0.2",
+        "producator": "Microsoft Corporation",
+        "data_instalare": "20240625",
+        "licenta": ""
+      },
+      {
+        "nume": "Check Point VPN",
+        "versiune": "98.61.2307",
+        "producator": "Check Point Software Technologies Ltd.",
+        "data_instalare": "20210405",
+        "licenta": ""
+      }
+    ]
+  },
+  "trafic_retea_bytes_primiti": 2055786985,
+  "trafic_retea_bytes_trimisi": 255258977,
+  "utilizare_cpu": 12.121212121212121,
+  "utilizare_ram": 63,
+  "utilizator": {
+    "nume_utilizator": "vph\\ivanca001",
+    "grup_utilizator": ""
+  }
+}
