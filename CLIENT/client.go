@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
@@ -396,26 +398,44 @@ func getLiveSystemInfo() (*LiveSystemInfo, error) {
 	return liveInfo, nil
 }
 
-// Structura pentru informatii despre sistem
-type SystemInfo struct {
-	SistemDeOperare   OSInfo       `json:"sistem_de_operare"`
-	Hardware          HardwareInfo `json:"hardware"`
-	Software          SoftwareInfo `json:"software"`
-	Securitate        string       `json:"securitate"`
-	Utilizator        UserInfo     `json:"utilizator"`
-	UtilizareCPU      float64      `json:"utilizare_cpu"`
-	UtilizareRAM      float64      `json:"utilizare_ram"`
-	TraficTrimis      uint64       `json:"trafic_retea_bytes_trimisi"`
-	TraficReceptionat uint64       `json:"trafic_retea_bytes_primiti"`
+// Funcție pentru a trimite datele JSON la server
+func sendJSONToServer(data []byte, serverURL string) error {
+	req, err := http.NewRequest("POST", serverURL, bytes.NewBuffer(data))
+	if err != nil {
+		return fmt.Errorf("eroare la crearea cererii: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("eroare la trimiterea cererii: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("serverul a returnat o eroare: %s - %s", resp.Status, string(body))
+	}
+
+	return nil
 }
 
 func main() {
 	// Adresa serverului
-	serverAddress := "http://localhost:8080/update" // Înlocuiți cu adresa corectă a serverului
-
+	serverURL := "http://localhost:8080/data" // Înlocuiți cu adresa corectă a serverului
+	// Creează fișierul JSON dacă nu există
+	fileName := "live_data.json"
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		_, err = os.Create(fileName)
+		if err != nil {
+			fmt.Printf("Eroare la crearea fișierului JSON: %v\n", err)
+			return
+		}
+	}
 	for {
 		// Creare structura pentru informațiile complete despre sistem
-		var systemInfo SystemInfo
+		systemInfo := make(map[string]interface{})
 
 		// Obținere informații despre sistemul de operare, hardware, software etc.
 		osInfo, err := getOSInfo()
@@ -424,38 +444,38 @@ func main() {
 			// Gestionare eroare - puteți seta valori implicite sau să continuați cu precauție
 			osInfo = &OSInfo{}
 		}
-		systemInfo.SistemDeOperare = *osInfo
+		systemInfo["sistem_de_operare"] = osInfo
 
 		hardwareInfo, err := getHardwareInfo()
 		if err != nil {
 			fmt.Printf("Eroare la obținerea informațiilor despre hardware: %v\n", err)
 			hardwareInfo = &HardwareInfo{}
 		}
-		systemInfo.Hardware = *hardwareInfo
+		systemInfo["hardware"] = hardwareInfo
 
 		installedPrograms, err := getInstalledPrograms()
 		if err != nil {
 			fmt.Printf("Eroare la obținerea informațiilor despre programele instalate: %v\n", err)
 			installedPrograms = []ProgramInfo{}
 		}
-		softwareInfo := SoftwareInfo{
+		softwareInfo := &SoftwareInfo{
 			ProgrameInstalate: installedPrograms,
 		}
-		systemInfo.Software = softwareInfo
+		systemInfo["software"] = softwareInfo
 
 		securityInfo, err := getSecurityInfo()
 		if err != nil {
 			fmt.Printf("Eroare la obținerea informațiilor despre securitate: %v\n", err)
 			securityInfo = "N/A"
 		}
-		systemInfo.Securitate = securityInfo
+		systemInfo["securitate"] = securityInfo
 
 		userInfo, err := getCurrentUserInfo()
 		if err != nil {
 			fmt.Printf("Eroare la obținerea informațiilor despre utilizator: %v\n", err)
 			userInfo = &UserInfo{}
 		}
-		systemInfo.Utilizator = *userInfo
+		systemInfo["utilizator"] = userInfo
 
 		// Extrage informații live
 		liveInfo, err := getLiveSystemInfo()
@@ -463,33 +483,41 @@ func main() {
 			fmt.Printf("Eroare la obținerea informațiilor live despre sistem: %v\n", err)
 			// Gestionare eroare - puteți seta valori implicite sau să continuați cu precauție
 			liveInfo = &LiveSystemInfo{}
+		} else {
+			fmt.Printf("--------------------\n")
+			fmt.Printf("Informații Live:\n")
+			fmt.Printf("Utilizare CPU: %.2f%%\n", liveInfo.UtilizareCPU)
+			fmt.Printf("Utilizare RAM: %.2f%%\n", liveInfo.UtilizareRAM)
+			fmt.Printf("Trafic Retea Trimis: %d\n", liveInfo.TraficTrimis)
+			fmt.Printf("Trafic Retea Receptionat: %d\n", liveInfo.TraficReceptionat)
 		}
 
 		// Actualizează datele live în structura systemInfo
-		systemInfo.UtilizareCPU = liveInfo.UtilizareCPU
-		systemInfo.UtilizareRAM = liveInfo.UtilizareRAM
-		systemInfo.TraficTrimis = liveInfo.TraficTrimis
-		systemInfo.TraficReceptionat = liveInfo.TraficReceptionat
+		systemInfo["utilizare_cpu"] = liveInfo.UtilizareCPU
+		systemInfo["utilizare_ram"] = liveInfo.UtilizareRAM
+		systemInfo["trafic_retea_bytes_trimisi"] = liveInfo.TraficTrimis
+		systemInfo["trafic_retea_bytes_primiti"] = liveInfo.TraficReceptionat
 
 		// Serializează toate datele în format JSON
-		jsonData, err := json.Marshal(systemInfo)
+		jsonData, err := json.MarshalIndent(systemInfo, "", "  ")
 		if err != nil {
 			fmt.Printf("Eroare la serializarea JSON: %v\n", err)
 			continue // Trece la următoarea iterație a buclei
 		}
 
-		// Trimite datele JSON către server
-		resp, err := http.Post(serverAddress, "application/json", bytes.NewBuffer(jsonData))
+		// Scrie datele JSON în fișier
+		err = os.WriteFile(fileName, jsonData, 0644)
 		if err != nil {
-			fmt.Printf("Eroare la trimiterea datelor către server: %v\n", err)
+			fmt.Printf("Eroare la scrierea în fișierul JSON: %v\n", err)
 			continue // Trece la următoarea iterație a buclei
 		}
-		defer resp.Body.Close()
 
-		if resp.StatusCode != http.StatusOK {
-			fmt.Printf("Serverul a returnat o eroare: %s\n", resp.Status)
+		// Trimite datele JSON la server
+		err = sendJSONToServer(jsonData, serverURL)
+		if err != nil {
+			fmt.Printf("Eroare la trimiterea datelor la server: %v\n", err)
 		} else {
-			fmt.Println("Datele au fost trimise cu succes către server.")
+			fmt.Println("Datele au fost trimise cu succes la server.")
 		}
 
 		time.Sleep(10 * time.Second)
