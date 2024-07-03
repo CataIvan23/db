@@ -1,19 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
-
-	"database/sql"
+	"time"
 
 	_ "github.com/lib/pq" // Driver PostgreSQL
 )
 
-// Structuri pentru datele primite de la client
+// Structura pentru informatii despre sistemul de operare
 type OSInfo struct {
 	Nume           string `json:"nume"`
 	Versiune       string `json:"versiune"`
@@ -22,6 +24,7 @@ type OSInfo struct {
 	Licenta        string `json:"licenta"`
 }
 
+// Structura pentru informatii despre hardware
 type HardwareInfo struct {
 	Procesor      string `json:"procesor"`
 	Nuclee        int    `json:"nuclee"`
@@ -34,10 +37,12 @@ type HardwareInfo struct {
 	PlacaVideo    string `json:"placa_video"`
 }
 
+// Structura pentru informatii despre software (programe instalate)
 type SoftwareInfo struct {
 	ProgrameInstalate []ProgramInfo `json:"programe_instalate"`
 }
 
+// Structura pentru informatii despre un program instalat
 type ProgramInfo struct {
 	Nume          string `json:"nume"`
 	Versiune      string `json:"versiune"`
@@ -46,11 +51,13 @@ type ProgramInfo struct {
 	Licenta       string `json:"licenta"`
 }
 
+// Structura pentru informatii despre utilizator
 type UserInfo struct {
 	NumeUtilizator string `json:"nume_utilizator"`
 	GrupUtilizator string `json:"grup_utilizator"`
 }
 
+// Structura pentru informatii live despre sistem
 type LiveSystemInfo struct {
 	UtilizareCPU      float64 `json:"utilizare_cpu"`
 	UtilizareRAM      float64 `json:"utilizare_ram"`
@@ -58,21 +65,31 @@ type LiveSystemInfo struct {
 	TraficReceptionat uint64  `json:"trafic_retea_bytes_primiti"`
 }
 
-type SystemInfo struct {
-	SistemDeOperare   OSInfo       `json:"sistem_de_operare"`
-	Hardware          HardwareInfo `json:"hardware"`
-	Software          SoftwareInfo `json:"software"`
-	Securitate        string       `json:"securitate"`
-	Utilizator        UserInfo     `json:"utilizator"`
-	UtilizareCPU      float64      `json:"utilizare_cpu"`
-	UtilizareRAM      float64      `json:"utilizare_ram"`
-	TraficTrimis      uint64       `json:"trafic_retea_bytes_trimisi"`
-	TraficReceptionat uint64       `json:"trafic_retea_bytes_primiti"`
+// Structura pentru a reprezenta întregul JSON
+type SystemData struct {
+	SistemDeOperare   *OSInfo       `json:"sistem_de_operare"`
+	Hardware          *HardwareInfo `json:"hardware"`
+	Software          *SoftwareInfo `json:"software"`
+	Securitate        string        `json:"securitate"`
+	Utilizator        *UserInfo     `json:"utilizator"`
+	UtilizareCPU      float64       `json:"utilizare_cpu"`
+	UtilizareRAM      float64       `json:"utilizare_ram"`
+	TraficTrimis      uint64        `json:"trafic_retea_bytes_trimisi"`
+	TraficReceptionat uint64        `json:"trafic_retea_bytes_primiti"`
 }
 
-func updateDatabase(db *sql.DB, systemInfo *SystemInfo, idStatie int) error {
-	// 3. Actualizare sau inserare în tabel 'metadate_statii'
+// Funcție pentru a actualiza baza de date
+func updateDatabase(db *sql.DB, data SystemData, idStatie int) error {
 	_, err := db.Exec(`
+		INSERT INTO statii_de_lucru (nume_statie) 
+		VALUES ($1)
+		ON CONFLICT (nume_statie) DO NOTHING;
+	`, data.Utilizator.NumeUtilizator)
+	if err != nil {
+		return fmt.Errorf("eroare la actualizarea/inserarea în tabelul 'statii_de_lucru': %w", err)
+	}
+
+	_, err = db.Exec(`
 		INSERT INTO metadate_statii (
 			id_statie, producator_procesor, model_procesor, nuclee, 
 			fire_executie, frecventa, memorie_ram, tip_stocare, 
@@ -100,17 +117,16 @@ func updateDatabase(db *sql.DB, systemInfo *SystemInfo, idStatie int) error {
 			data_instalare_sistem_operare = EXCLUDED.data_instalare_sistem_operare,
 			licenta_sistem_operare = EXCLUDED.licenta_sistem_operare,
 			securitate = EXCLUDED.securitate
-	`, idStatie, strings.Split(systemInfo.Hardware.PlacaDeBaza, " ")[0], systemInfo.Hardware.Procesor, systemInfo.Hardware.Nuclee,
-		systemInfo.Hardware.FireExecutie, systemInfo.Hardware.Frecventa, systemInfo.Hardware.MemorieRAM, systemInfo.Hardware.TipStocare,
-		systemInfo.Hardware.CapacitateHDD, systemInfo.Hardware.PlacaDeBaza, systemInfo.Hardware.PlacaVideo,
-		systemInfo.SistemDeOperare.Nume, systemInfo.SistemDeOperare.Versiune, systemInfo.SistemDeOperare.Arhitectura,
-		systemInfo.SistemDeOperare.DataInstalarii, systemInfo.SistemDeOperare.Licenta, systemInfo.Securitate)
+	`, idStatie, strings.Split(data.Hardware.PlacaDeBaza, " ")[0], data.Hardware.Procesor, data.Hardware.Nuclee,
+		data.Hardware.FireExecutie, data.Hardware.Frecventa, data.Hardware.MemorieRAM, data.Hardware.TipStocare,
+		data.Hardware.CapacitateHDD, data.Hardware.PlacaDeBaza, data.Hardware.PlacaVideo,
+		data.SistemDeOperare.Nume, data.SistemDeOperare.Versiune, data.SistemDeOperare.Arhitectura,
+		data.SistemDeOperare.DataInstalarii, data.SistemDeOperare.Licenta, data.Securitate)
 	if err != nil {
 		return fmt.Errorf("eroare la actualizarea metadatelor stației: %w", err)
 	}
 
-	// 4. Actualizare tabel 'software_instalat'
-	for _, program := range systemInfo.Software.ProgrameInstalate {
+	for _, program := range data.Software.ProgrameInstalate {
 		_, err = db.Exec(`
 			INSERT INTO software_instalat (id_statie, nume, versiune, producator, data_instalare, licenta)
 			VALUES ($1, $2, $3, $4, $5, $6)
@@ -121,11 +137,10 @@ func updateDatabase(db *sql.DB, systemInfo *SystemInfo, idStatie int) error {
 		}
 	}
 
-	// 5. Inserare în tabel 'metrici_statii'
 	_, err = db.Exec(`
 		INSERT INTO metrici_statii (id_statie, timestamp, utilizare_cpu, utilizare_memorie, trafic_retea_bytes_trimisi, trafic_retea_bytes_primiti) 
 		VALUES ($1, NOW(), $2, $3, $4, $5)
-	`, idStatie, systemInfo.UtilizareCPU, systemInfo.UtilizareRAM, systemInfo.TraficTrimis, systemInfo.TraficReceptionat)
+	`, idStatie, data.UtilizareCPU, data.UtilizareRAM, data.TraficTrimis, data.TraficReceptionat)
 	if err != nil {
 		return fmt.Errorf("eroare la inserarea metricii stației: %w", err)
 	}
@@ -133,90 +148,95 @@ func updateDatabase(db *sql.DB, systemInfo *SystemInfo, idStatie int) error {
 	return nil
 }
 
-func getStationID(db *sql.DB, numeStatie string) (int, error) {
-	var idStatie int
-	err := db.QueryRow("SELECT id_statie FROM statii_de_lucru WHERE nume_statie = $1", numeStatie).Scan(&idStatie)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// Nu există o intrare pentru această stație, deci o creăm
-			// Trebuie să furnizați informațiile necesare pentru tabelul 'statii_de_lucru'
-			// Aici presupunem că există un utilizator cu ID-ul 1
-			err = db.QueryRow("INSERT INTO statii_de_lucru (nume_statie, id_persoana) VALUES ($1, 1) RETURNING id_statie", numeStatie).Scan(&idStatie)
-			if err != nil {
-				return 0, fmt.Errorf("eroare la crearea intrării stației de lucru: %w", err)
-			}
-			return idStatie, nil
-		} else {
-			return 0, fmt.Errorf("eroare la interogarea bazei de date: %w", err)
+func handleJSONData(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	if r.Method == "POST" {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Eroare la citirea corpului cererii", http.StatusBadRequest)
+			return
 		}
+
+		var jsonData SystemData
+		err = json.Unmarshal(body, &jsonData)
+		if err != nil {
+			http.Error(w, "Eroare la parsarea JSON", http.StatusBadRequest)
+			return
+		}
+
+		numeStatie := jsonData.Utilizator.NumeUtilizator
+		var idStatie int
+		err = db.QueryRow("SELECT id_statie FROM statii_de_lucru WHERE nume_statie = $1", numeStatie).Scan(&idStatie)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Stația de lucru nu a fost găsită în baza de date", http.StatusNotFound)
+				return
+			} else {
+				http.Error(w, fmt.Sprintf("Eroare la interogarea bazei de date: %v", err), http.StatusInternalServerError)
+				return
+			}
+		}
+
+		err = updateDatabase(db, jsonData, idStatie)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Eroare la actualizarea bazei de date: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "Datele JSON au fost primite și baza de date a fost actualizată cu succes!")
+	} else {
+		http.Error(w, "Metodă HTTP neacceptată", http.StatusMethodNotAllowed)
 	}
-	return idStatie, nil
-}
-
-func handleUpdate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Metoda nepermisă", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Citește datele JSON din corpul cererii
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Eroare la citirea datelor din cerere", http.StatusInternalServerError)
-		return
-	}
-	defer r.Body.Close()
-
-	// Deserializează datele JSON
-	var systemInfo SystemInfo
-	err = json.Unmarshal(body, &systemInfo)
-	if err != nil {
-		http.Error(w, "Eroare la parsarea JSON", http.StatusBadRequest)
-		return
-	}
-
-	numeStatie := systemInfo.Utilizator.NumeUtilizator
-	idStatie, err := getStationID(db, numeStatie)
-	if err != nil {
-		fmt.Printf("Eroare la obținerea/crearea ID-ului stației: %v\n", err)
-		return
-	}
-
-	fmt.Printf("ID-ul stației curente: %d\n", idStatie)
-
-	// Actualizare baza de date
-	err = updateDatabase(db, &systemInfo, idStatie)
-	if err != nil {
-		http.Error(w, "Eroare la actualizarea bazei de date", http.StatusInternalServerError)
-		return
-	}
-
-	// Răspuns de succes
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Datele au fost actualizate cu succes în baza de date!")
 }
 
 func main() {
-	// Informații despre conexiunea la baza de date
 	connStr := "postgres://postgres:password@localhost/postgres?sslmode=disable"
 
-	// Conectare la baza de date
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatalf("Eroare la conectarea la baza de date: %v", err)
+		log.Fatalf("Eroare la conectarea la baza de date: %v\n", err)
 	}
 	defer db.Close()
 
-	// Verificare conexiune
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Eroare la verificarea conexiunii la baza de date: %v", err)
+		log.Fatalf("Eroare la verificarea conexiunii la baza de date: %v\n", err)
 	}
 
-	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
-		handleUpdate(w, r, db)
-	})
+	go func() {
+		http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
+			handleJSONData(w, r, db)
+		})
 
-	fmt.Println("Serverul ascultă pe portul 8080...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+		log.Printf("Serverul HTTP pornit și ascultă pe portul :8080")
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	}()
+
+	for {
+		data, err := os.ReadFile("live_data.json")
+		if err != nil {
+			log.Fatalf("Eroare la citirea fișierului JSON: %v\n", err)
+		}
+
+		req, err := http.NewRequest("POST", "http://localhost:8080/data", bytes.NewBuffer(data))
+		if err != nil {
+			log.Fatalf("Eroare la crearea cererii: %v\n", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatalf("Eroare la trimiterea cererii: %v\n", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Eroare la citirea răspunsului: %v\n", err)
+		}
+
+		fmt.Println("Răspuns de la server:", string(body))
+
+		time.Sleep(10 * time.Second)
+	}
 }
