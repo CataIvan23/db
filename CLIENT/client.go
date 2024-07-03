@@ -418,6 +418,12 @@ func sendJSONToServer(data []byte, serverURL string) error {
 		return fmt.Errorf("serverul a returnat o eroare: %s - %s", resp.Status, string(body))
 	}
 
+	// Afișează răspunsul serverului
+	fmt.Println("Răspuns de la server:")
+	fmt.Println(resp.Status)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+
 	return nil
 }
 
