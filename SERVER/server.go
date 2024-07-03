@@ -118,42 +118,38 @@ func updateDatabase(db *sql.DB, systemInfo map[string]interface{}, idStatie int)
 		return fmt.Errorf("cheia 'securitate' lipsește sau nu este de tipul string")
 	}
 
-	// Extrage informațiile live despre sistem doar dacă există
-	liveInfo, ok := systemInfo["live_info"].(map[string]interface{})
-	if ok {
-		// Verificăm cheile din `liveInfo` doar dacă `liveInfo` există
-		utilizareCPU, ok := liveInfo["utilizare_cpu"].(float64)
-		if !ok {
-			return fmt.Errorf("cheia 'utilizare_cpu' lipsește sau nu este de tipul float64 în 'live_info'")
-		}
+	//  1. Extrageți informațiile live despre sistem
+	utilizareCPU, ok := systemInfo["utilizare_cpu"].(float64)
+	if !ok {
+		return fmt.Errorf("cheia 'utilizare_cpu' lipsește sau nu este de tipul float64")
+	}
 
-		utilizareRAM, ok := liveInfo["utilizare_ram"].(float64)
-		if !ok {
-			return fmt.Errorf("cheia 'utilizare_ram' lipsește sau nu este de tipul float64 în 'live_info'")
-		}
+	utilizareRAM, ok := systemInfo["utilizare_ram"].(float64)
+	if !ok {
+		return fmt.Errorf("cheia 'utilizare_ram' lipsește sau nu este de tipul float64")
+	}
 
-		traficTrimis, ok := liveInfo["trafic_retea_bytes_trimisi"].(float64)
-		if !ok {
-			return fmt.Errorf("cheia 'trafic_retea_bytes_trimisi' lipsește sau nu este de tipul float64 în 'live_info'")
-		}
+	traficTrimis, ok := systemInfo["trafic_retea_bytes_trimisi"].(float64)
+	if !ok {
+		return fmt.Errorf("cheia 'trafic_retea_bytes_trimisi' lipsește sau nu este de tipul float64")
+	}
 
-		traficReceptionat, ok := liveInfo["trafic_retea_bytes_primiti"].(float64)
-		if !ok {
-			return fmt.Errorf("cheia 'trafic_retea_bytes_primiti' lipsește sau nu este de tipul float64 în 'live_info'")
-		}
+	traficReceptionat, ok := systemInfo["trafic_retea_bytes_primiti"].(float64)
+	if !ok {
+		return fmt.Errorf("cheia 'trafic_retea_bytes_primiti' lipsește sau nu este de tipul float64 ")
+	}
 
-		// 5. Inserare în tabel 'metrici_statii' doar dacă 'live_info' există
-		_, err := db.Exec(`
-			INSERT INTO metrici_statii (id_statie, timestamp, utilizare_cpu, utilizare_memorie, trafic_retea_bytes_trimisi, trafic_retea_bytes_primiti) 
-			VALUES ($1, NOW(), $2, $3, $4, $5)
-		`, idStatie, utilizareCPU, utilizareRAM, traficTrimis, traficReceptionat)
-		if err != nil {
-			return fmt.Errorf("eroare la inserarea metricii stației: %w", err)
-		}
+	// 2. Inserare în tabel 'metrici_statii'
+	_, err := db.Exec(`
+		INSERT INTO metrici_statii (id_statie, timestamp, utilizare_cpu, utilizare_memorie, trafic_retea_bytes_trimisi, trafic_retea_bytes_primiti) 
+		VALUES ($1, NOW(), $2, $3, $4, $5)
+	`, idStatie, utilizareCPU, utilizareRAM, traficTrimis, traficReceptionat)
+	if err != nil {
+		return fmt.Errorf("eroare la inserarea metricii stației: %w", err)
 	}
 
 	// Actualizare sau inserare în tabel 'metadate_statii'
-	_, err := db.Exec(`
+	_, err = db.Exec(`
 		INSERT INTO metadate_statii (
 			id_statie, producator_procesor, model_procesor, nuclee, 
 			fire_executie, frecventa, memorie_ram, tip_stocare, 
@@ -190,7 +186,7 @@ func updateDatabase(db *sql.DB, systemInfo map[string]interface{}, idStatie int)
 		return fmt.Errorf("eroare la actualizarea metadatelor stației: %w", err)
 	}
 
-	// 4. Actualizare tabel 'software_instalat'
+	// Actualizare tabel 'software_instalat'
 	for _, program := range softwareInfo["programe_instalate"].([]interface{}) {
 		programMap, ok := program.(map[string]interface{})
 		if !ok {
