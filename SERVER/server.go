@@ -53,8 +53,8 @@ type ProgramInfo struct {
 type LiveSystemInfo struct {
 	UtilizareCPU      float64 `json:"utilizare_cpu"`
 	UtilizareRAM      float64 `json:"utilizare_ram"`
-	TraficTrimis      uint64  `json:"trafic_retea_bytes_trimisi"`
-	TraficReceptionat uint64  `json:"trafic_retea_bytes_primiti"`
+	TraficTrimis      int8    `json:"trafic_retea_bytes_trimisi"`
+	TraficReceptionat int8    `json:"trafic_retea_bytes_primiti"`
 }
 
 // Funcție pentru a încărca datele JSON din fișier
@@ -195,7 +195,10 @@ func updateDatabase(db *sql.DB, systemInfo map[string]interface{}, idStatie int)
 		_, err = db.Exec(`
 			INSERT INTO software_instalat (id_statie, nume, versiune, producator, data_instalare, licenta)
 			VALUES ($1, $2, $3, $4, $5, $6)
-			ON CONFLICT (id_statie, nume, versiune) DO NOTHING
+			ON CONFLICT (id_statie, nume, versiune) DO UPDATE SET 
+			producator = EXCLUDED.producator,
+			data_instalare = EXCLUDED.data_instalare,
+			licenta = EXCLUDED.licenta
 		`, idStatie, programMap["nume"], programMap["versiune"], programMap["producator"], programMap["data_instalare"], programMap["licenta"])
 		if err != nil {
 			return fmt.Errorf("eroare la actualizarea software-ului instalat: %w", err)
